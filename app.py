@@ -48,18 +48,19 @@ if st.button("Lancer l'Analyse"):
         is_spam = spam_probability >= threshold
         
         # 5. AFFICHAGE DES RÉSULTATS
-        st.divider()
+                st.divider()
         if is_spam:
-            st.error(f"### 🚨 RÉSULTAT : SPAM")
-            st.metric(label="Indice de suspicion", value=f"{spam_probability*100:.2f}%")
+            st.error(f"🚨 **RÉSULTAT : SPAM**")
+            st.warning(f"Confiance : {spam_probability*100:.2f}%")
         else:
-            st.success(f"### ✅ RÉSULTAT : HAM (Légitime)")
-            st.metric(label="Indice de confiance", value=f"{(1 - spam_probability)*100:.2f}%")
+            st.success(f"✅ **RÉSULTAT : HAM (Légitime)**")
+            st.info(f"Confiance : {(1 - spam_probability)*100:.2f}%")
             
+        # Barre de progression visuelle
+        st.write("Probabilité de spam :")
         st.progress(spam_probability)
-        st.caption("Le modèle analyse la structure grammaticale et les combinaisons de mots (N-Grams).")
     else:
-        st.warning("Veuillez entrer un message.")
+        st.warning("Veuillez entrer un message avant d'analyser.")
 
 # Footer obligatoire pour l'examen
 st.markdown("---")
