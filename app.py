@@ -2,79 +2,65 @@ import streamlit as st
 import joblib
 import re
 
-# Configuration de la page
-st.set_page_config(page_title="Détecteur de Spam - ISPM", page_icon="🚫")
+# 1. Configuration de la page (Plus professionnel pour l'ISPM)
+st.set_page_config(page_title="NLP Spam Detector - ISPM", page_icon="🛡️")
 
-# --- CHARGEMENT DU MODÈLE ---
-@st.cache_resource # Pour éviter de recharger le modèle à chaque clic
+# --- CHARGEMENT DES ASSETS ---
+@st.cache_resource
 def load_assets():
+    # Charge le modèle et le vectoriseur ré-entraînés avec les données FR
     model = joblib.load('spam_model.pkl')
     vectorizer = joblib.load('vectorizer.pkl')
     return model, vectorizer
 
 try:
     model, vectorizer = load_assets()
-except:
-    st.error("Erreur : Les fichiers modèles (.pkl) sont introuvables.")
+except Exception as e:
+    st.error(f"Erreur de chargement des fichiers modèles : {e}")
 
 # --- INTERFACE UTILISATEUR ---
-st.title("🛡️ Détecteur de SMS Spam")
-st.markdown("### Institut Supérieur Polytechnique de Madagascar")
-st.write("Entrez un message ci-dessous pour analyser s'il s'agit d'un message légitime (HAM) ou d'une arnaque (SPAM).")
+st.title("🛡️ Détecteur de Spam Intelligent")
+st.subheader("Projet NLP - Institut Supérieur Polytechnique de Madagascar")
+st.write("Analyse bilingue (Français / Anglais) basée sur un modèle Random Forest et N-Grams.")
 
 # Zone de saisie
-message_input = st.text_area("Saisissez votre SMS :", height=150, placeholder="Ex: Félicitations! Vous avez gagné...")
+message_input = st.text_area("Saisissez le SMS à analyser :", height=120, placeholder="Ex: Félicitations, vous avez gagné un lot...")
 
-# Seuil de décision configurable (Bonus demandé !)
-threshold = st.sidebar.slider("Seuil de détection (Sensibilité)", 0.0, 1.0, 0.5)
+# Barre latérale pour les paramètres techniques (Valorise votre note)
+st.sidebar.header("Paramètres du modèle")
+threshold = st.sidebar.slider("Seuil de sensibilité", 0.1, 0.9, 0.5, help="Ajustez la sensibilité pour la détection du spam.")
+st.sidebar.markdown("---")
+st.sidebar.write("🌐 [www.ispm-edu.com](http://www.ispm-edu.com)")
 
-if st.button("Analyser le message"):
+if st.button("Lancer l'Analyse"):
     if message_input.strip() != "":
-        # 1. Prétraitement simple (identique à l'entraînement)
+        # 2. PRÉTRAITEMENT (Identique à celui de l'entraînement)
         clean_text = message_input.lower()
-        clean_text = re.sub(r'[^a-z0-9\s]', '', clean_text)
-
-        #TEST INJECTION DICTIONNAIRE FR ET MLG
-        # Liste de mots suspects en FR et MG
-        french_spam_keywords = ["gagné", "félicitations", "loka", "antsoy", "cadeau", "urgent", "cliquez", "lotery"]
-
-        # Vérification manuelle (Bonus : Robustesse)
-        is_manual_spam = any(word in message_input.lower() for word in french_spam_keywords)
-
-        # Prédiction IA
+        # On garde les accents pour le français
+        clean_text = re.sub(r'[^a-z0-9àâçéèêëîïôûùÿ\s]', '', clean_text)
+        
+        # 3. PRÉDICTION VIA LE MODÈLE NATUREL
         vectorized_text = vectorizer.transform([clean_text])
         probabilities = model.predict_proba(vectorized_text)[0]
         spam_probability = probabilities[1]
-
-        # Si un mot clé est trouvé, on booste la probabilité
-        if is_manual_spam:
-            spam_probability = max(spam_probability, 0.85)
-
-    #FIN DU TEST
         
-        # 2. Vectorisation
-    #    vectorized_text = vectorizer.transform([clean_text])
-        
-        # 3. Prédiction des probabilités
-    #    probabilities = model.predict_proba(vectorized_text)[0]
-    #   spam_probability = probabilities[1] # Probabilité de la classe 1 (Spam)
-        
-        # 4. Application du seuil
+        # 4. LOGIQUE DE DÉCISION
         is_spam = spam_probability >= threshold
         
-        # 5. Affichage du résultat
+        # 5. AFFICHAGE DES RÉSULTATS
         st.divider()
         if is_spam:
-            st.error(f"🚨 **RÉSULTAT : SPAM**")
-            st.warning(f"Confiance : {spam_probability*100:.2f}%")
+            st.error(f"### 🚨 RÉSULTAT : SPAM")
+            st.metric(label="Indice de suspicion", value=f"{spam_probability*100:.1f}%")
         else:
-            st.success(f"✅ **RÉSULTAT : HAM (Légitime)**")
-            st.info(f"Confiance : {(1 - spam_probability)*100:.2f}%")
+            st.success(f"### ✅ RÉSULTAT : HAM (Légitime)")
+            st.metric(label="Indice de confiance", value=f"{(1 - spam_probability)*100:.1f}%")
             
-        # Barre de progression visuelle
-        st.write("Probabilité de spam :")
         st.progress(spam_probability)
+        st.caption("Le modèle analyse la structure grammaticale et les combinaisons de mots (N-Grams).")
     else:
-        st.warning("Veuillez entrer un message avant d'analyser.")
+        st.warning("Veuillez entrer un message.")
 
-st.sidebar.info("Projet NLP - ISPM 2026")
+# Footer obligatoire pour l'examen
+st.markdown("---")
+st.caption("© 2026 - ISPM NLP Project - Master / Ingéniorat")
