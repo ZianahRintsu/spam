@@ -22,6 +22,7 @@ except Exception as e:
 st.title("🛡️ Détecteur de Spam Intelligent")
 st.subheader("Projet NLP - Institut Supérieur Polytechnique de Madagascar")
 st.write("Analyse bilingue (Français / Anglais) basée sur un modèle Random Forest et N-Grams.")
+st.write("Entrez un message ci-dessous pour analyser s'il s'agit d'un message légitime (HAM) ou d'une arnaque (SPAM).")
 
 # Zone de saisie
 message_input = st.text_area("Saisissez le SMS à analyser :", height=120, placeholder="Ex: Félicitations, vous avez gagné un lot...")
