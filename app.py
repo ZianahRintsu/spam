@@ -51,10 +51,10 @@ if st.button("Lancer l'Analyse"):
         st.divider()
         if is_spam:
             st.error(f"### 🚨 RÉSULTAT : SPAM")
-            st.metric(label="Indice de suspicion", value=f"{spam_probability*100:.1f}%")
+            st.metric(label="Indice de suspicion", value=f"{spam_probability*100:.2f}%")
         else:
             st.success(f"### ✅ RÉSULTAT : HAM (Légitime)")
-            st.metric(label="Indice de confiance", value=f"{(1 - spam_probability)*100:.1f}%")
+            st.metric(label="Indice de confiance", value=f"{(1 - spam_probability)*100:.2f}%")
             
         st.progress(spam_probability)
         st.caption("Le modèle analyse la structure grammaticale et les combinaisons de mots (N-Grams).")
